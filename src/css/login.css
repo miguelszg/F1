@@ -84,7 +84,7 @@
     filter: drop-shadow(0 0 2em #8f0000);
 }
 
-.span {
+.span-login {
     text-decoration: none;
     color: var(--bg-dark);
 }
@@ -98,7 +98,7 @@
     height: auto;
     display: block;
     border-radius: 10px;
-    margin-top: -4rem;
+    margin-top: -0.5rem;
     margin-left: -15rem;
 }
 

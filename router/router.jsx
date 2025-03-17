@@ -2,6 +2,9 @@ import { BrowserRouter as Router, Routes, Route }  from "react-router-dom";
 import Login from "../src/pages/login";
 import Register from "../src/pages/register";
 import NotFound from "../src/pages/NotFound";
+import Home from "../src/pages/home";
+import Profile from "../src/pages/profile";
+import Articule from "../src/pages/Articule";
 
 function AppRouter() {
     return (
@@ -10,6 +13,9 @@ function AppRouter() {
                 <Route path="/" element={<Login />} />
                 <Route path="/register" element={<Register />} />
                 <Route path="*" element={<NotFound />} />
+                <Route path="/home" element={<Home/>} />
+                <Route path="/profile" element={<Profile/>} />
+                <Route path="/articule" element={<Articule/>} />
             </Routes>
         </Router>
     );

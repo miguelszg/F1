@@ -1,0 +1,21 @@
+.news-bar {
+    background-color: #0c0c0c;
+    width: 100vw;
+    margin: 0;
+    padding: 15px 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    left: 50%;
+    right: 50%;
+    margin-left: -50vw;
+    margin-right: -50vw;
+  }
+  
+  .title {
+    color: white;
+    margin: 0;
+    font-size: 28px;
+    font-weight: bold;
+  }

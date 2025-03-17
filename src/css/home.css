@@ -1,0 +1,13 @@
+:root {
+    --navbar-height: 500px; 
+  }
+  
+  .content-container {
+    margin-top: var(--navbar-height);
+    width: 100%;
+  }
+  
+  
+  .main-news-section {
+    margin-top: var(--navbar-height);
+  }

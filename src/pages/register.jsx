@@ -31,8 +31,8 @@ const Register = () => {
                     <input type="password" name="confirm_password" id="confirm_password" />
                 </span>
                 <span className="span"><a href=""></a></span>
-                <input className="submit" type="submit" value="Log in" />
-                <span className="span">Do you have an account? <button type="button"  className='register_btn' onClick={handleLogin}>Login</button></span>
+                <input className="submit" type="submit" value="Register" />
+                <span className="span-register">Do you have an account? <button type="button"  className='register_btn' onClick={handleLogin}>Login</button></span>
             </form>
             <img className='image2' src={image} alt="Register" />
         </div>

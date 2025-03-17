@@ -12,6 +12,11 @@ const Login = () => {
         e.preventDefault();
         navigate('/register');  
     }
+
+    const handleHome = (e) => {
+        e.preventDefault();
+        navigate('/home');
+    }
     
     return (
         <div className='container'>
@@ -27,8 +32,8 @@ const Login = () => {
                     <input type="password" name="password" id="password" />
                 </span>
                 <span className="span"><a href=""></a></span>
-                <input className="submit" type="submit" value="Log in" />
-                <span className="span">Dont you have an account? <button type="button" className='register_btn' onClick={handleRegister}>Login</button></span>
+                <input className="submit" type="submit" onClick={handleHome} value="Log in" />
+                <span className="span-login">Dont you have an account? <button type="button" className='register_btn' onClick={handleRegister}>Register</button></span>
             </form>
         </div>
     );
