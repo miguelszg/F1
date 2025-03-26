@@ -1,0 +1,93 @@
+.forgot-form {
+    --bg-light: #efefef;
+    --bg-dark: #da3d3d;
+    --clr: #ffffff;
+    --clr-alpha: #ffffff;
+    --letter: #000000;
+    --btn-color: #262525;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2rem;
+    width: 100%;
+    max-width: 400px;
+}
+
+.forgot-form .input-wrapper {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.forgot-form input {
+    border-radius: 0.5rem;
+    padding: 1rem;
+    width: 100%;
+    border: none;
+    background-color: var(--clr-alpha);
+    outline: 2px solid var(--bg-dark);
+    color: var(--letter);
+    font-size: 1rem;
+}
+
+.forgot-form input:focus {
+    outline: 2px solid var(--clr);
+}
+
+.forgot-label {
+    align-self: flex-start;
+    color: var(--clr);
+    font-weight: 600;
+}
+
+.forgot-btn {
+    text-decoration: none;
+    color: var(--clr);
+    background-color: var(--btn-color);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    width: 100%;
+    font-weight: 600;
+    transition: all 300ms;
+    cursor: pointer;
+    border: none;
+}
+
+.forgot-btn:hover {
+    background-color: var(--clr);
+    color: var(--bg-dark);
+}
+
+.forgot-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 4rem;
+    gap: 3rem;
+}
+
+.forgot-error {
+    color: #ff6b6b;
+    font-size: 0.9rem;
+    margin-top: -1rem;
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .forgot-container {
+        flex-direction: column;
+        padding: 2rem;
+        gap: 2rem;
+    }
+
+    .forgot-form {
+        max-width: 100%;
+    }
+
+    .forgot-btn {
+        width: 100%;
+    }
+}

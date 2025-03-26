@@ -2,8 +2,10 @@ import Navbar from '../layouts/navbar';
 import '../css/profile.css';
 import profile from '../assets/profile.jpg';
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 const Profile = () => {
+    const navigate = useNavigate();
     const [formData, setFormData] = useState({
         name: '',
         email: '',
@@ -18,6 +20,21 @@ const Profile = () => {
             [name]: value
         }));
     };
+
+    const handleLogout = (e) => {
+        e.preventDefault();
+        navigate('/');
+    };
+    const handleCancel = (e) => {
+        e.preventDefault();
+        navigate('/home');
+    };
+
+    const handleSave= (e) => {
+        e.preventDefault();
+        navigate('/home');
+    };
+
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -71,8 +88,11 @@ const Profile = () => {
                             />
                         </div>
                         <div className="form-actions">
-                            <button type="button" className="cancel-btn">Cancel</button>
-                            <button type="submit" className="save-btn">Save</button>
+                            <button type="button" className="cancel-btn" onClick={handleCancel}>Cancel</button>
+                            <button type="submit" className="save-btn"onClick={handleSave}>Save</button>
+                        </div>
+                        <div className="logout-container">
+                             <button type="button" className="logout-btn" onClick={handleLogout}>Log Out</button>
                         </div>
                     </form>
                 </div>

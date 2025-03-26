@@ -8,13 +8,13 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 1rem;
+    gap: 2rem;
     width: 100%;
-    max-width: 500px;
+    max-width: 400px;
 }
 
 .form .input-span {
-    width: 140%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
@@ -23,7 +23,7 @@
 .form input[type="email"],
 .form input[type="password"] {
     border-radius: 0.5rem;
-    padding: 1rem; 
+    padding: 1rem;
     width: 100%;
     border: none;
     display: flex;
@@ -59,8 +59,8 @@
 }
 
 .form .submit {
-    padding: 1rem 0.75rem;
-    width: 50%;
+    padding: 1rem 1.5rem;
+    width: 100%;
     display: flex;
     align-items: center;
     gap: 0.5rem;
@@ -72,7 +72,7 @@
     transition: all 300ms;
     font-weight: 600;
     font-size: 0.9rem;
-    margin-bottom: 5rem;
+    margin-bottom: 3rem;
 }
 
 .form .submit:hover {
@@ -98,54 +98,205 @@
     height: auto;
     display: block;
     border-radius: 10px;
-    margin-top: -0.5rem;
-    margin-left: -15rem;
+    object-fit: cover;
+    margin-top: -1rem;
+    margin-left: -10rem;
 }
 
 .container {
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
     height: 100vh;
-    padding: 10rem;
-    gap: 1rem;
+    padding: 4rem;
+    gap: 3rem;
 }
 
 .logo {
-    width: 90%;
+    width: 100%;
     height: auto;
     display: block;
-    margin-top: -5rem;
-    margin-left: 0rem;
-    margin-bottom: -3rem;
+    margin-top: -2rem;
+    margin-bottom: 2rem;
 }
 
+/* Estilos mejorados para el modal MFA */
+.mfa-modal {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 2000;
+    width: 700px;
+    padding: 2.5rem;
+    background-color: var(--bg-dark);
+    color: var(--clr);
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+    display: flex;
+    gap: 2.5rem;
+}
 
+.mfa-content {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    flex: 1;
+}
+
+.qr-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding-right: 2rem;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.qr-code {
+    width: 200px;
+    height: 200px;
+    background: white;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 1.5rem;
+}
+
+.qr-instructions {
+    text-align: center;
+    font-size: 1.1rem;
+    line-height: 1.5;
+    margin-bottom: 1rem;
+}
+
+.form-section {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.mfa-title {
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.mfa-field {
+    margin-bottom: 1.5rem;
+    color: var(--clr);
+}
+
+.mfa-field label {
+    display: block;
+    margin-bottom: 0.8rem;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.mfa-field input {
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border-radius: 6px;
+    border: none;
+    background-color: rgba(64, 64, 64, 0.95);
+    font-size: 1rem;
+}
+
+.mfa-verify-btn {
+    width: 100%;
+    padding: 1rem;
+    border-radius: 6px;
+    border: none;
+    background-color: var(--clr);
+    color: var(--bg-dark);
+    font-weight: 600;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-top: 1rem;
+}
+
+.mfa-verify-btn:hover {
+    background-color: var(--bg-light);
+    transform: translateY(-2px);
+}
+
+.mfa-modal button.close-btn {
+    background-color: var(--bg-dark);
+    color: var(--clr);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    position: absolute;
+    top: 18px;
+    right: 18px;
+    font-size: 1.6rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mfa-modal button.close-btn:hover {
+    background-color: var(--clr);
+    color: var(--bg-dark);
+    transform: rotate(90deg);
+}
+
+.error {
+    color: #ff6b6b;
+    font-size: 0.9rem;
+    margin-top: -1rem;
+}
+
+/* Responsive styles */
 @media (max-width: 768px) {
     .container {
         flex-direction: column;
-        padding: 1rem;
+        padding: 2rem;
         gap: 2rem;
     }
 
     .image {
-        width: 100%;
+        width: 80%;
+        margin-top: 2rem;
         margin-left: 0;
-        margin-top: 0;
-        border-radius: 0;
     }
 
     .form {
         max-width: 100%;
     }
 
-    .form input[type="email"],
-    .form input[type="password"] {
-        padding: 1rem;
+    .form .submit {
+        width: 100%;
     }
 
     .logo {
         margin-top: 0;
+        margin-bottom: 1rem;
+    }
+
+    .mfa-modal {
+        width: 90%;
+        flex-direction: column;
+        padding: 1.5rem;
+    }
+
+    .qr-section {
+        border-right: none;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+        padding-right: 0;
+        padding-bottom: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .qr-code {
+        width: 180px;
+        height: 180px;
     }
 }
 
@@ -161,5 +312,9 @@
 
     .form {
         max-width: 250px;
+    }
+
+    .mfa-modal {
+        width: 650px;
     }
 }
