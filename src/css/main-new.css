@@ -78,7 +78,8 @@ body {
 .carousel-image img {
     margin-top: 5rem;
     width: 80%;
-    height: 70%;
+    height: 50%;
+    margin-top: 160px;
     object-fit: cover;
     border-radius: 10px;
 }

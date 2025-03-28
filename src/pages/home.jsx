@@ -4,6 +4,7 @@ import Navbar from '../layouts/navbar';
 import MainNew from '../layouts/main-new';
 import News from '../componets/news';
 import { useLocation } from 'react-router-dom'; 
+import Footbar from '../layouts/footbar';
 
 const Home = () => {
     const location = useLocation(); 
@@ -32,6 +33,7 @@ const Home = () => {
                 <MainNew />
                 <News id="collections-section" />
             </div>
+            <Footbar />
         </div>
     );
 }

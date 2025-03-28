@@ -1,23 +1,24 @@
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 import '../css/newsCarousel.css';
-import image1 from '../assets/1.jpg';
-import image2 from '../assets/2.jpg';
 
 const NewsCarousel = () => {
     const navigate = useNavigate();
-    
-    const newsItems = [
-        {
-            title: "GANADORES DEL CAMPEONATO",
-            image: image1,
-            link: "/news/campeonato-victoria"
-        },
-        {
-            title: "LA PRUEBA MAS ESPERADA",
-            image: image2,
-            link: "/news/296-challenge"
-        }
-    ];
+    const [newsItems, setNewsItems] = useState([]);
+
+    useEffect(() => {
+        const fetchNews = async () => {
+            try {
+                const response = await api.get('/news');
+                setNewsItems(response.data);
+            } catch (error) {
+                console.error('Error al obtener las noticias:', error);
+            }
+        };
+
+        fetchNews();
+    }, []);
 
     const handleNewsClick = (link) => {
         navigate(link);
@@ -25,15 +26,15 @@ const NewsCarousel = () => {
 
     return (
         <div className='news-carousel'>
-            {newsItems.map((item, index) => (
+            {newsItems.map((item) => (
                 <div 
                     className='news-item' 
-                    key={index}
-                    onClick={() => handleNewsClick(item.link)}
+                    key={item._id}
+                    onClick={() => handleNewsClick(`/news/${item._id}`)}
                 >
                     <div className='news-image-container'>
                         <img 
-                            src={item.image} 
+                            src={item.imageUrl} 
                             alt={item.title} 
                             className='news-image'
                         />

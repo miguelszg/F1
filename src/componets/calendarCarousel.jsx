@@ -1,44 +1,49 @@
+import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import api from '../services/api';
 import '../css/calendarCarousel.css';
-import image1 from '../assets/Pista1.jpg';
-import image2 from '../assets/Pista2.jpg';
 
 const CalendarCarousel = () => {
     const navigate = useNavigate();
-    
-    const newsItems = [
-        {
-            title: "NUEVA CIRCUITO EN TODO EL MUNDO",
-            image: image1,
-            link: "/news/campeonato-victoria"
-        },
-        {
-        title: "LA CARRERA MAS ESPERADA",
-            image: image2,
-            link: "/news/296-challenge"
-        }
-    ];
+    const [events, setEvents] = useState([]);
 
-    const handleNewsClick = (link) => {
-        navigate(link);
+    useEffect(() => {
+        const fetchEvents = async () => {
+            try {
+                const response = await api.get('/calendar'); 
+                const normalizedEvents = response.data.map(event => ({
+                    ...event,
+                    imageUrl: event.imageUrl // Usamos imageUrl directamente
+                }));
+                setEvents(normalizedEvents);
+            } catch (error) {
+                console.error('Error al obtener eventos:', error);
+            }
+        };
+
+        fetchEvents();
+    }, []);
+
+    const handleEventClick = (id) => {
+        navigate(`/calendar/${id}`);
     };
 
     return (
         <div className='news-carousel'>
-            {newsItems.map((item, index) => (
+            {events.map((event) => (
                 <div 
                     className='news-item' 
-                    key={index}
-                    onClick={() => handleNewsClick(item.link)}
+                    key={event._id}
+                    onClick={() => handleEventClick(event._id)} 
                 >
                     <div className='news-image-container'>
                         <img 
-                            src={item.image} 
-                            alt={item.title} 
+                            src={event.imageUrl}
+                            alt={event.title} 
                             className='news-image'
                         />
                         <div className='news-overlay'>
-                            <h3 className='news-title'>{item.title}</h3>
+                            <h3 className='news-title'>{event.title}</h3>
                         </div>
                     </div>
                 </div>

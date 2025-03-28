@@ -1,0 +1,68 @@
+/* footbar.css */
+.footbar {
+    width: 100vw;
+    margin-left: calc(-50vw + 50%); /* Solución para ancho completo */
+    background-color: #1a1a1a;
+    padding: 20px 0;
+    border-top: 1px solid #333;
+    margin-top: auto; /* Esto la empuja hacia abajo */
+}
+
+.footbar-container {
+    width: 1750px; /* Mismo ancho que tu container-news */
+    margin: 0 auto;
+    padding: 0 130px; /* Mismo padding que tu diseño principal */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    box-sizing: border-box;
+}
+
+.footbar-links {
+    display: flex;
+    gap: 25px;
+}
+
+.footbar-link {
+    color: #e0e0e0;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: color 0.3s ease;
+}
+
+.footbar-link:hover {
+    color: #fff;
+    text-decoration: underline;
+}
+
+.footbar-copyright {
+    color: #666;
+    font-size: 0.8rem;
+    text-align: center;
+}
+
+/* Responsive */
+@media (max-width: 1800px) {
+    .footbar-container {
+        width: 100%;
+        padding: 0 60px;
+    }
+}
+
+@media (max-width: 768px) {
+    .footbar {
+        margin-left: 0;
+        padding: 15px 0;
+    }
+    
+    .footbar-container {
+        padding: 0 20px;
+    }
+    
+    .footbar-links {
+        gap: 15px;
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+}

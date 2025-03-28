@@ -42,9 +42,13 @@ const Login = () => {
         e.preventDefault();
         try {
             const response = await api.post('verify-mfa', { correo: email, code: mfaCode });
-            if (response.data.token) {
+            
+            if (response.data.token && response.data.userId) {
                 localStorage.setItem('token', response.data.token);
+                localStorage.setItem('userId', response.data.userId);  
                 navigate('/home');
+                console.log(localStorage.getItem('userId'));
+
             } else {
                 setError(response.data.error);
             }
@@ -52,6 +56,7 @@ const Login = () => {
             setError(err.response?.data?.error || 'Error al verificar el código MFA');
         }
     };
+    
 
     const closeMfaModal = () => {
         setShowMfaModal(false);

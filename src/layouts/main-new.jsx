@@ -1,48 +1,27 @@
 import { useState, useEffect, useRef } from 'react';
 import '../css/main-new.css';
 import { useNavigate } from 'react-router-dom';
-import nuevo from '../assets/new.jpg'
-import campeonato from '../assets/champions.jpg'
-import prueba from '../assets/Circuito_Monteblanco.jpg'
+import api from '../services/api'; 
 
 const MainNew = () => {
     const navigate = useNavigate();
     const [currentSlide, setCurrentSlide] = useState(0);
+    const [slides, setSlides] = useState([]);
     const timerRef = useRef(null);
-    
-    const slides = [
-        {
-            title: "LA PRUEBA MAS ESPERADA",
-            description: "El 296 Challenge, sometido al examen de la prensa internacional en el circuito de Monteblanco",
-            image: prueba,
-            link: "/articule"
-        },
-        {
-            title: "NUEVO MODELO REVELADO",
-            description: "Descubre las características del último modelo de nuestra marca",
-            image: nuevo,
-            link: "/articule"
-        },
-        {
-            title: "GANADORES DEL CAMPEONATO",
-            description: "Nuestro equipo logra una victoria histórica en el campeonato internacional",
-            image: campeonato,
-            link: "/articule"
-        }
-    ];
-
-    const startTimer = () => {
-        if (timerRef.current) {
-            clearInterval(timerRef.current);
-        }
-        
-        timerRef.current = setInterval(() => {
-            setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
-        }, 10000); 
-    };
 
     useEffect(() => {
+        const fetchSlides = async () => {
+            try {
+                const response = await api.get('/carousel'); 
+                setSlides(response.data);
+            } catch (error) {
+                console.error('Error al obtener los datos del carrusel:', error);
+            }
+        };
+
+        fetchSlides();
         startTimer();
+
         return () => {
             if (timerRef.current) {
                 clearInterval(timerRef.current);
@@ -50,25 +29,35 @@ const MainNew = () => {
         };
     }, []);
 
+    const startTimer = () => {
+        if (timerRef.current) {
+            clearInterval(timerRef.current);
+        }
+
+        timerRef.current = setInterval(() => {
+            setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
+        }, 10000);
+    };
+
     const nextSlide = () => {
         setCurrentSlide((prevSlide) => (prevSlide + 1) % slides.length);
-        startTimer(); 
+        startTimer();
     };
 
     const prevSlide = () => {
         setCurrentSlide((prevSlide) => (prevSlide - 1 + slides.length) % slides.length);
-        startTimer(); 
+        startTimer();
     };
-
 
     const goToSlide = (index) => {
         setCurrentSlide(index);
-        startTimer(); 
+        startTimer();
     };
 
-    const handleNew = (e, link) => {
+    const handleNew = (e, id) => {
         e.preventDefault();
-        navigate(link);
+        console.log('ID de la noticia:', id);
+        navigate(`/articule/${id}`);
     };
 
     return (
@@ -83,13 +72,13 @@ const MainNew = () => {
                             <div className="carousel-text">
                                 <h2>{slide.title}</h2>
                                 <p>{slide.description}</p>
-                                <button onClick={(e) => handleNew(e, slide.link)} className="read-more-btn">
+                                <button onClick={(e) => handleNew(e, slide._id)} className="read-more-btn">
                                     LEER MÁS
                                     <span className="arrow-icon">→</span>
                                 </button>
                             </div>
                             <div className="carousel-image">
-                                <img src={slide.image} alt={slide.title} />
+                                <img src={slide.imageUrl} alt={slide.title} />
                             </div>
                         </div>
                     ))}

@@ -1,5 +1,5 @@
 import process from 'process';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import express from 'express';
 import bcrypt from 'bcryptjs';
 import speakeasy from 'speakeasy';
@@ -55,20 +55,15 @@ async function startServer() {
             if (!passwordMatch) {
                 return res.status(400).json({ error: 'Contraseña incorrecta' });
             }
-    
-            // Generamos un nuevo secreto para MFA cada vez que el usuario inicie sesión
             const secret = speakeasy.generateSecret({ name: 'MyApp' });
             
-            // Guardamos el secreto en la base de datos (si es la primera vez que el usuario inicia sesión con MFA)
             await mongoClient.db().collection('users').updateOne(
                 { correo },
-                { $set: { mfaSecret: secret.base32 } } // Guardamos el secreto en la base de datos
+                { $set: { mfaSecret: secret.base32 } } 
             );
     
-            // Generamos el código QR
             const qrCodeUrl = await qrcode.toDataURL(secret.otpauth_url);
     
-            // Devolvemos el código QR al frontend
             return res.status(200).json({ message: 'Configura MFA', qrCodeUrl });
         } catch (error) {
             console.error('Error en el login:', error);
@@ -84,13 +79,10 @@ app.post('/api/forgot-password', async (req, res) => {
       const user = await mongoClient.db().collection('users').findOne({ correo });
       if (!user) return res.status(400).json({ error: 'Correo no registrado' });
 
-      // Generar un código aleatorio de 6 dígitos
       const resetCode = Math.floor(100000 + Math.random() * 900000).toString();
 
-      // Guardar el código en la base de datos
       await mongoClient.db().collection('users').updateOne({ correo }, { $set: { resetCode } });
 
-      // Enviar correo con el código
       await transporter.sendMail({
           from: 'tuemail@gmail.com',
           to: correo,
@@ -116,10 +108,8 @@ app.post('/api/reset-password', async (req, res) => {
           return res.status(400).json({ error: 'Código incorrecto o expirado' });
       }
 
-      // Hashear la nueva contraseña
       const hashedPassword = await bcrypt.hash(nuevaContraseña, 10);
 
-      // Actualizar la contraseña y eliminar el código de recuperación
       await mongoClient.db().collection('users').updateOne(
           { correo },
           { $set: { contraseña: hashedPassword }, $unset: { resetCode: 1 } }
@@ -132,36 +122,237 @@ app.post('/api/reset-password', async (req, res) => {
   }
 });
 
+  app.post('/api/report', async (req, res) => {
+    const { name, email, description } = req.body;
+
+    if (!name || !email || !description) {
+        return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+    }
+
+    try {
+        const report = {
+            name,
+            email,
+            description,
+            createdAt: new Date()
+        };
+        await mongoClient.db().collection('reports').insertOne(report);
+
+        await transporter.sendMail({
+            from: 'ms462974@gmail.com',
+            to: email,
+            subject: 'Confirmación de reporte',
+            text: `Hola ${name},\n\nHemos recibido tu reporte:\n"${description}"\n\nGracias por contactarnos.`,
+        });
+
+        res.status(200).json({ message: 'Reporte enviado y correo de confirmación enviado' });
+    } catch (error) {
+        console.error('Error al enviar el reporte:', error);
+        res.status(500).json({ error: 'Error al procesar el reporte' });
+    }
+  });
+
+
     // 📌 API para verificar el código MFA
     app.post('/api/verify-mfa', async (req, res) => {
       const { correo, code } = req.body;
-
+  
       try {
-        const user = await mongoClient.db().collection('users').findOne({ correo });
-        if (!user || !user.mfaSecret) {
-          return res.status(400).json({ error: 'MFA no configurado o no disponible' });
+          const user = await mongoClient.db().collection('users').findOne({ correo });
+          if (!user || !user.mfaSecret) {
+              return res.status(400).json({ error: 'MFA no configurado o no disponible' });
+          }
+  
+          const isValid = speakeasy.totp.verify({
+              secret: user.mfaSecret,
+              encoding: 'base32',
+              token: code,
+              window: 1,
+          });
+  
+          if (!isValid) {
+              return res.status(400).json({ error: 'Código MFA incorrecto' });
+          }
+  
+          const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+  
+          res.status(200).json({ message: 'Autenticación exitosa', token, userId: user._id });
+      } catch (error) {
+          res.status(500).json({ error: 'Error al verificar el código MFA' });
+      }
+  });
+  // En tu servidor (server.js)
+app.get('/api/carousel', async (req, res) => {
+    try {
+      const slides = await mongoClient.db().collection('carousel').find().limit(3).toArray();
+      // Normalizamos los datos antes de enviarlos
+      const normalizedSlides = slides.map(slide => ({
+        ...slide,
+        imageUrl: slide.image // Renombramos el campo
+      }));
+      res.status(200).json(normalizedSlides);
+    } catch (error) {
+      console.error('Error al obtener datos del carrusel:', error);
+      res.status(500).json({ error: 'Error al obtener datos del carrusel' });
+    }
+  });
+
+//NOticias carrucel principal
+app.get('/api/articles/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'ID no válido' });
         }
 
-        // Verificamos el código TOTP
-        const isValid = speakeasy.totp.verify({
-          secret: user.mfaSecret,
-          encoding: 'base32',
-          token: code,
-          window: 1, // Permite 1 código fuera de tiempo de tolerancia
+        const article = await mongoClient.db().collection('carousel').findOne({ 
+            _id: new ObjectId(id) 
         });
 
-        if (!isValid) {
-          return res.status(400).json({ error: 'Código MFA incorrecto' });
+        if (!article) {
+            return res.status(404).json({ message: 'Documento no encontrado en carousel' });
         }
 
-        // Si es válido, generar JWT
-        const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
+        article.imageUrl = article.image; // Opcional: renombrar campo si es necesario
+        res.json(article);
+    } catch (error) {
+        res.status(500).json({ message: 'Error al obtener el documento' });
+    }
+});
 
-        res.status(200).json({ message: 'Autenticación exitosa', token });
-      } catch (error) {
-        res.status(500).json({ error: 'Error al verificar el código MFA' });
+//Api-calendar
+app.get('/api/calendar', async (req, res) => {
+    try {
+        const events = await mongoClient.db().collection('calendar').find().toArray();
+        const normalizedEvents = events.map(event => ({
+            ...event,
+            imageUrl: event.imageUrl || '', // Aseguramos que siempre tenga una propiedad `imageUrl`
+        }));
+        res.json(normalizedEvents);
+    } catch (error) {
+        console.error('Error al obtener los eventos:', error);
+        res.status(500).json({ message: 'Error al obtener los eventos' });
+    }
+});
+
+app.get('/api/calendar/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'ID no válido' });
+        }
+
+        const event = await mongoClient.db().collection('calendar').findOne({ _id: new ObjectId(id) });
+
+        if (!event) {
+            return res.status(404).json({ message: 'Evento no encontrado' });
+        }
+
+        event.imageUrl = event.imageUrl || ''; // Aseguramos que el campo `imageUrl` esté presente
+        res.json(event);
+    } catch (error) {
+        console.error('Error al obtener el evento:', error);
+        res.status(500).json({ message: 'Error al obtener el evento' });
+    }
+});
+
+
+
+  
+
+  app.get('/api/user/:userId', async (req, res) => {
+    let { userId } = req.params;
+
+    try {
+        if (!ObjectId.isValid(userId)) {
+            return res.status(400).json({ error: 'ID de usuario no válido' });
+        }
+
+        const user = await mongoClient.db().collection('users').findOne({ _id: new ObjectId(userId) });
+
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        res.json(user);
+    } catch (error) {
+        console.error('Error al obtener datos del usuario:', error);
+        res.status(500).json({ error: 'Error al obtener datos del usuario' });
+    }
+});
+
+//actualizar los datos del usuario PUT
+app.put('/api/user/:userId', async (req, res) => {
+  const { userId } = req.params;
+  const { nombre, descripcion } = req.body;
+
+  try {
+      if (!ObjectId.isValid(userId)) {
+          return res.status(400).json({ error: 'ID de usuario no válido' });
       }
-    });
+
+      const user = await mongoClient.db().collection('users').findOne({ _id: new ObjectId(userId) });
+      if (!user) {
+          return res.status(404).json({ error: 'Usuario no encontrado' });
+      }
+
+      if (user.nombre === nombre && user.descripcion === descripcion) {
+          return res.status(400).json({ error: 'No se realizaron cambios' });
+      }
+
+      const result = await mongoClient.db().collection('users').updateOne(
+          { _id: new ObjectId(userId) },
+          { $set: { nombre, descripcion } }
+      );
+
+      if (result.modifiedCount === 0) {
+          return res.status(400).json({ error: 'No se realizaron cambios' });
+      }
+
+      res.status(200).json({ message: 'Perfil actualizado con éxito' });
+  } catch (error) {
+      console.error('Error al actualizar el perfil:', error);
+      res.status(500).json({ error: 'Error al actualizar el perfil' });
+  }
+});
+
+//NEWS
+app.get('/api/news', async (req, res) => {
+    try {
+        const newsList = await mongoClient.db().collection('news').find().toArray();
+        res.status(200).json(newsList);
+    } catch (error) {
+        console.error('Error al obtener las noticias:', error);
+        res.status(500).json({ error: 'Error al obtener las noticias' });
+    }
+});
+
+app.get('/api/news/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ message: 'ID no válido' });
+        }
+
+        const newsItem = await mongoClient.db().collection('news').findOne({ _id: new ObjectId(id) });
+
+        if (!newsItem) {
+            return res.status(404).json({ message: 'Noticia no encontrada' });
+        }
+
+        res.json(newsItem);
+    } catch (error) {
+        console.error('Error al obtener la noticia:', error);
+        res.status(500).json({ message: 'Error al obtener la noticia' });
+    }
+});
+
+
+
+
 
     const server = app.listen(PORT, () => {
       console.log(`✅ Server running on port ${PORT}`);

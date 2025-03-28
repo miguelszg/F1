@@ -6,6 +6,8 @@ import Home from "../src/pages/home";
 import Profile from "../src/pages/profile";
 import Articule from "../src/pages/Articule";
 import ForgotPassword from "../src/pages/forgotpaswword";
+import NewsDetail from "../src/pages/NewsDetail";
+import CalendarDetail from "../src/pages/CalendarDetail";
 
 function AppRouter() {
     return (
@@ -16,8 +18,10 @@ function AppRouter() {
                 <Route path="*" element={<NotFound />} />
                 <Route path="/home" element={<Home/>} />
                 <Route path="/profile" element={<Profile/>} />
-                <Route path="/articule" element={<Articule/>} />
+                <Route path="/articule/:id" element={<Articule />} />
                 <Route path="/forgot-password" element={<ForgotPassword/>} />
+                <Route path="/news/:id" element={<NewsDetail />} />
+                <Route path="/calendar/:id" element={<CalendarDetail />} />
             </Routes>
         </Router>
     );
