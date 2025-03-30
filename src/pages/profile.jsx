@@ -18,13 +18,15 @@ const Profile = () => {
     useEffect(() => {
         const fetchUserData = async () => {
             const userId = localStorage.getItem('userId');
+            console.log('UserID en localStorage:', userId);
             if (!userId) {
                 navigate('/');
                 return;
             }
-
+    
             try {
                 const response = await api.get(`user/${userId}`);
+                console.log('Datos del usuario:', response.data);
                 setFormData({
                     name: response.data.nombre || '',
                     email: response.data.correo || '',
@@ -34,9 +36,10 @@ const Profile = () => {
                 console.error('Error al obtener datos del usuario:', error);
             }
         };
-
+    
         fetchUserData();
     }, [navigate]);
+    
 
     const handleChange = (e) => {
         const { name, value } = e.target;
