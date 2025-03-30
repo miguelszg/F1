@@ -1,7 +1,7 @@
 import axios from 'axios';
 
 // URL base de tu API
-const API_URL = 'server-f1.vercel.app';
+const API_URL = 'https://server-f1.vercel.app';
 
 const api = axios.create({
   baseURL: API_URL,
