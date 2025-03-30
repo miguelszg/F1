@@ -16,14 +16,17 @@ const Profile = () => {
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     useEffect(() => {
+        const userId = localStorage.getItem('userId');
+        console.log('UserID en localStorage:', userId);
+        
+        // Si no hay userId en localStorage, no hacemos nada
+        if (!userId) {
+            console.log('No hay userId en localStorage');
+            return;
+        }
+
+        // Si hay userId, intentamos obtener los datos
         const fetchUserData = async () => {
-            const userId = localStorage.getItem('userId');
-            console.log('UserID en localStorage:', userId);
-            if (!userId) {
-                navigate('/');
-                return;
-            }
-    
             try {
                 const response = await api.get(`/api/user/${userId}`);
                 console.log('Datos del usuario:', response.data);
@@ -36,10 +39,9 @@ const Profile = () => {
                 console.error('Error al obtener datos del usuario:', error);
             }
         };
-    
+
         fetchUserData();
-    }, [navigate]);
-    
+    }, []); // Eliminamos navigate del array de dependencias, ya que no es necesario
 
     const handleChange = (e) => {
         const { name, value } = e.target;
@@ -57,7 +59,7 @@ const Profile = () => {
     const confirmSave = async () => {
         const userId = localStorage.getItem('userId');
         if (!userId) {
-            navigate('/');
+            console.log('No hay userId, no se pueden guardar cambios');
             return;
         }
     
