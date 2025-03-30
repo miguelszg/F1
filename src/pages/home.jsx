@@ -6,6 +6,7 @@ import News from '../componets/news';
 import { useLocation } from 'react-router-dom'; 
 import Footbar from '../layouts/footbar';
 import useAuthRedirect from '../layouts/useAuthRedirect';
+import api from '../services/api';
 
 const Home = () => {
     const location = useLocation(); 

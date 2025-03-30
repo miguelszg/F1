@@ -25,7 +25,7 @@ const Profile = () => {
             }
     
             try {
-                const response = await api.get(`user/${userId}`);
+                const response = await api.get(`/api/user/${userId}`);
                 console.log('Datos del usuario:', response.data);
                 setFormData({
                     name: response.data.nombre || '',
