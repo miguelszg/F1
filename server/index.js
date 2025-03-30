@@ -42,6 +42,50 @@ async function startServer() {
 
     const PORT = process.env.PORT || 5000;
 
+
+    //SSE
+    app.get('/api/stream', (req, res) => {
+        res.setHeader('Content-Type', 'text/event-stream');
+        res.setHeader('Cache-Control', 'no-cache');
+        res.setHeader('Connection', 'keep-alive');
+    
+        const sendEvent = (data) => {
+            res.write(`data: ${JSON.stringify(data)}\n\n`);
+        };
+    
+        sendEvent({ message: 'Conexión establecida' });
+    
+        const interval = setInterval(() => {
+            sendEvent({ timestamp: new Date().toISOString() });
+        }, 5000); // Envía datos cada 5 segundos
+    
+        req.on('close', () => {
+            clearInterval(interval);
+        });
+    });
+
+    app.post('/api/register', async (req, res) => {
+        try {
+          const { nombre, correo, contraseña } = req.body;
+      
+          // Verificar si el correo ya está registrado
+          const existingUser = await User.findOne({ correo });
+          if (existingUser) {
+            return res.status(400).json({ error: 'El correo ya está registrado' });
+          }
+      
+          // Crear un nuevo usuario
+          const newUser = new User({ nombre, correo, contraseña });
+          await newUser.save();
+          res.status(201).json({ message: 'Usuario registrado correctamente' });
+      
+        } catch (error) {
+          res.status(500).json({ error: 'Error al registrar usuario' });
+        }
+      });
+
+    // 📌 API para iniciar sesión    
+
     app.post('/api/login', async (req, res) => {
         const { correo, contraseña } = req.body;
     
@@ -347,6 +391,221 @@ app.get('/api/news/:id', async (req, res) => {
     } catch (error) {
         console.error('Error al obtener la noticia:', error);
         res.status(500).json({ message: 'Error al obtener la noticia' });
+    }
+});
+
+
+app.put('/api/articles/:id/rate', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { rate } = req.body; 
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ error: 'ID no válido' });
+        }
+
+        if (rate < 1 || rate > 5) {
+            return res.status(400).json({ error: 'La calificación debe estar entre 1 y 5' });
+        }
+
+        const result = await mongoClient.db().collection('carousel').updateOne(
+            { _id: new ObjectId(id) },
+            { $set: { rate } } 
+        );
+
+        if (result.modifiedCount === 0) {
+            return res.status(404).json({ error: 'Artículo no encontrado' });
+        }
+
+        res.json({ message: 'Calificación actualizada correctamente' });
+    } catch (error) {
+        console.error('Error al actualizar la calificación:', error);
+        res.status(500).json({ error: 'Error al actualizar la calificación' });
+    }
+});
+
+
+
+// 📌 API para agregar un comentario a un artículo
+// 📌 API para agregar un comentario a un artículo (en la colección carousel)
+app.post('/api/articles/:id/comment', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId, comment } = req.body;
+
+        if (!ObjectId.isValid(id) || !ObjectId.isValid(userId)) {
+            return res.status(400).json({ error: 'ID no válido' });
+        }
+
+        if (!comment.trim()) {
+            return res.status(400).json({ error: 'El comentario no puede estar vacío' });
+        }
+
+        const user = await mongoClient.db().collection('users').findOne({ _id: new ObjectId(userId) });
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        const newComment = {
+            userId: new ObjectId(userId),
+            userName: user.nombre,
+            comment,
+            createdAt: new Date()
+        };
+
+        // Actualizar el artículo en la colección carousel y agregar el comentario
+        await mongoClient.db().collection('carousel').updateOne(
+            { _id: new ObjectId(id) },
+            { $push: { comments: newComment } }  // Se agrega el comentario al arreglo "comments"
+        );
+
+        res.status(201).json({ message: 'Comentario agregado correctamente' });
+    } catch (error) {
+        console.error('Error al agregar el comentario:', error);
+        res.status(500).json({ error: 'Error al agregar el comentario' });
+    }
+});
+
+
+// 📌 API para agregar un comentario a un artículo
+// 📌 API para agregar un comentario a un artículo (en la colección carousel)
+// API para agregar un comentario a un artículo (en la colección carousel)
+app.post('/api/articles/:id/comment', async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { userId, comment } = req.body;
+
+        if (!ObjectId.isValid(id) || !ObjectId.isValid(userId)) {
+            return res.status(400).json({ error: 'ID no válido' });
+        }
+
+        if (!comment.trim()) {
+            return res.status(400).json({ error: 'El comentario no puede estar vacío' });
+        }
+
+        const user = await mongoClient.db().collection('users').findOne({ _id: new ObjectId(userId) });
+        if (!user) {
+            return res.status(404).json({ error: 'Usuario no encontrado' });
+        }
+
+        const newComment = {
+            _id: new ObjectId(), // Se genera un _id único para el comentario
+            userId: new ObjectId(userId),
+            userName: user.nombre,
+            comment,
+            createdAt: new Date()
+        };
+
+        // Actualizar el artículo en la colección carousel y agregar el comentario
+        await mongoClient.db().collection('carousel').updateOne(
+            { _id: new ObjectId(id) },
+            { $push: { comments: newComment } }  // Se agrega el comentario al arreglo "comments"
+        );
+
+        res.status(201).json({ message: 'Comentario agregado correctamente' });
+    } catch (error) {
+        console.error('Error al agregar el comentario:', error);
+        res.status(500).json({ error: 'Error al agregar el comentario' });
+    }
+});
+
+
+// 📌 API para obtener los comentarios de un artículo
+app.get('/api/articles/:id/comments', async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        if (!ObjectId.isValid(id)) {
+            return res.status(400).json({ error: 'ID de artículo no válido' });
+        }
+
+        const article = await mongoClient.db().collection('carousel').findOne({ _id: new ObjectId(id) });
+
+        if (!article) {
+            return res.status(404).json({ error: 'Artículo no encontrado' });
+        }
+
+        res.json(article.comments);  // Retornar los comentarios almacenados en el artículo
+    } catch (error) {
+        console.error('Error al obtener los comentarios:', error);
+        res.status(500).json({ error: 'Error al obtener los comentarios' });
+    }
+});
+
+
+
+
+// 📌 API para editar un comentario (solo el autor puede hacerlo)
+// 📌 API para editar un comentario (solo el autor puede hacerlo)
+app.put('/api/comments/:commentId', async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const { userId, comment } = req.body;
+
+        if (!ObjectId.isValid(commentId) || !ObjectId.isValid(userId)) {
+            return res.status(400).json({ error: 'ID no válido' });
+        }
+
+        if (!comment.trim()) {
+            return res.status(400).json({ error: 'El comentario no puede estar vacío' });
+        }
+
+        const article = await mongoClient.db().collection('carousel').findOne({ 'comments._id': new ObjectId(commentId) });
+        if (!article) {
+            return res.status(404).json({ error: 'Comentario no encontrado' });
+        }
+
+        const commentToUpdate = article.comments.find(c => c._id.toString() === commentId);
+        if (commentToUpdate.userId.toString() !== userId) {
+            return res.status(403).json({ error: 'No tienes permiso para editar este comentario' });
+        }
+
+        // Actualizar el comentario
+        await mongoClient.db().collection('carousel').updateOne(
+            { _id: new ObjectId(article._id) },
+            { $set: { 'comments.$[elem].comment': comment, 'comments.$[elem].updatedAt': new Date() } },
+            { arrayFilters: [{ 'elem._id': new ObjectId(commentId) }] }
+        );
+
+        res.json({ message: 'Comentario actualizado correctamente' });
+    } catch (error) {
+        console.error('Error al editar el comentario:', error);
+        res.status(500).json({ error: 'Error al editar el comentario' });
+    }
+});
+
+
+// 📌 API para eliminar un comentario (solo el autor puede hacerlo)
+// 📌 API para eliminar un comentario (solo el autor puede hacerlo)
+app.delete('/api/comments/:commentId', async (req, res) => {
+    try {
+        const { commentId } = req.params;
+        const { userId } = req.body;
+
+        if (!ObjectId.isValid(commentId) || !ObjectId.isValid(userId)) {
+            return res.status(400).json({ error: 'ID no válido' });
+        }
+
+        const article = await mongoClient.db().collection('carousel').findOne({ 'comments._id': new ObjectId(commentId) });
+        if (!article) {
+            return res.status(404).json({ error: 'Comentario no encontrado' });
+        }
+
+        const commentToDelete = article.comments.find(c => c._id.toString() === commentId);
+        if (commentToDelete.userId.toString() !== userId) {
+            return res.status(403).json({ error: 'No tienes permiso para eliminar este comentario' });
+        }
+
+        // Eliminar el comentario
+        await mongoClient.db().collection('carousel').updateOne(
+            { _id: new ObjectId(article._id) },
+            { $pull: { comments: { _id: new ObjectId(commentId) } } }
+        );
+
+        res.json({ message: 'Comentario eliminado correctamente' });
+    } catch (error) {
+        console.error('Error al eliminar el comentario:', error);
+        res.status(500).json({ error: 'Error al eliminar el comentario' });
     }
 });
 

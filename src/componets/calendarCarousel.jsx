@@ -13,7 +13,7 @@ const CalendarCarousel = () => {
                 const response = await api.get('/calendar'); 
                 const normalizedEvents = response.data.map(event => ({
                     ...event,
-                    imageUrl: event.imageUrl // Usamos imageUrl directamente
+                    imageUrl: event.imageUrl 
                 }));
                 setEvents(normalizedEvents);
             } catch (error) {

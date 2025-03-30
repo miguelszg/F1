@@ -5,10 +5,29 @@ import MainNew from '../layouts/main-new';
 import News from '../componets/news';
 import { useLocation } from 'react-router-dom'; 
 import Footbar from '../layouts/footbar';
+import useAuthRedirect from '../layouts/useAuthRedirect';
 
 const Home = () => {
     const location = useLocation(); 
 
+    useAuthRedirect();
+
+
+    useEffect(() => {
+        const eventSource = new EventSource('http://localhost:5000/api/stream');
+    
+        eventSource.onmessage = (event) => {
+            console.log('Mensaje recibido:', JSON.parse(event.data));
+        };
+    
+        eventSource.onerror = () => {
+            console.log('Error en SSE');
+            eventSource.close();
+        };
+    
+        return () => eventSource.close();
+    }, []);
+    
     
     useEffect(() => {
         if (location.state?.scrollTo) {
