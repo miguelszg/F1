@@ -12,7 +12,6 @@ const Articule = () => {
     const [hover, setHover] = useState(0);
     const [comments, setComments] = useState([]); // Estado para los comentarios
     const [newComment, setNewComment] = useState(''); // Estado para el comentario nuevo
-    const [editCommentText, setEditCommentText] = useState(''); // Texto del comentario en edición
 
     useEffect(() => {
         const fetchArticle = async () => {
@@ -28,11 +27,13 @@ const Articule = () => {
         const fetchComments = async () => {
             try {
                 const response = await api.get(`/articles/${id}/comments`);
+                console.log('Comentarios:', response.data); // Verifica lo que está devolviendo la API
                 setComments(response.data);
             } catch (error) {
                 console.error('Error al obtener los comentarios:', error);
             }
         };
+        
 
         fetchArticle();
         fetchComments();
@@ -51,6 +52,8 @@ const Articule = () => {
         e.preventDefault();
 
         const userId = localStorage.getItem('userId');
+        const userName = localStorage.getItem('userName') || 'Anónimo';
+
         if (!userId) {
             console.error('No se encontró el userId en el localStorage');
             return;
@@ -68,7 +71,7 @@ const Articule = () => {
             });
 
             setComments([...comments, {
-                userName: localStorage.getItem('userName'),
+                userName: userName,
                 comment: newComment,
                 createdAt: new Date().toISOString()
             }]);
@@ -78,10 +81,6 @@ const Articule = () => {
             console.error('Error al enviar el comentario:', error);
         }
     };
-
-
-
-   
 
     return (
         <div className="page-container-article" id="top-section">
@@ -125,19 +124,7 @@ const Articule = () => {
                                     comments.map((comment, index) => (
                                         <li key={index} className="comment">
                                             <strong>{comment.userName || 'Anónimo'}:</strong>
-                                            {editCommentId === comment._id ? (
-                                                <>
-                                                    <textarea
-                                                        value={editCommentText}
-                                                        onChange={(e) => setEditCommentText(e.target.value)}
-                                                    />
-                                              
-                                                </>
-                                            ) : (
-                                                <>
-                                                    <span>{comment.comment}</span>
-                                                </>
-                                            )}
+                                            <span>{comment.comment}</span>
                                         </li>
                                     ))
                                 ) : (
