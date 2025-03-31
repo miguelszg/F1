@@ -57,7 +57,7 @@ const Navbar = () => {
                         <li><a onClick={handleHome}>Racing</a></li>
                         <li><a href="#collections-section" onClick={(e) => scrollToSection(e, 'collections-section')}>Collections</a></li>
                         <li><a href="/sports">Sports cars</a></li>
-                        <li><a href="/profile">Profile</a></li>
+                        <li><a onClick={(e) => { e.preventDefault(); navigate('/profile'); }}>Profile</a></li>
                         <div className="spacer"></div> 
                         <li><a className='contact-link' href="#" onClick={openModal}>Contact Us</a></li>
                     </ul>
