@@ -27,6 +27,14 @@ const Profile = () => {
             try {
                 const response = await api.get(`user/${userId}`);
                 console.log('Datos del usuario:', response.data);
+
+                // 🔥 Aquí ajustamos los datos recibidos de la API
+                setFormData({
+                    name: response.data.nombre || '',
+                    email: response.data.correo || '',
+                    description: response.data.descripcion || ''
+                });
+
             } catch (error) {
                 console.error('Error al obtener datos del usuario:', error.response ? error.response.data : error);
             }
@@ -66,7 +74,6 @@ const Profile = () => {
                 descripcion: formData.description
             });
     
-            // Si no hay cambios, muestra un mensaje
             if (response.data.message === 'No se realizaron cambios') {
                 alert('No se realizaron cambios');
                 return;
