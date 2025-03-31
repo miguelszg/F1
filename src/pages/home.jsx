@@ -15,7 +15,7 @@ const Home = () => {
 
 
     useEffect(() => {
-        const eventSource = new EventSource('http://localhost:5000/api/stream');
+        const eventSource = new EventSource(`${api.defaults.baseURL}/stream`);
     
         eventSource.onmessage = (event) => {
             console.log('Mensaje recibido:', JSON.parse(event.data));
