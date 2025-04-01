@@ -17,21 +17,29 @@ const Login = () => {
 
     const handleLogin = async (e) => {
         e.preventDefault();
-
+    
         try {
             const response = await api.post('login', { correo: email, contraseña: password });
-
+    
             if (response.data.qrCodeUrl) {
+                // Si el usuario necesita configurar MFA, mostramos el QR
                 setQrCodeUrl(response.data.qrCodeUrl); 
-                setShowMfaModal(true); 
+                setShowMfaModal(true);
+            } else if (response.data.requireMfa) {
+                // Si MFA ya está configurado, solicitar código MFA
+                setShowMfaModal(true);
             } else {
-                setError(response.data.message);
+                // Guardamos el role solo si MFA no es necesario
+                localStorage.setItem('role', response.data.role);
+                navigate('/home');
             }
         } catch (err) {
             setError(err.response?.data?.error || 'Error en el inicio de sesión');
         }
     };
-
+    
+    
+    
 
     const handleRegister = (e) => {
         e.preventDefault();
@@ -46,6 +54,7 @@ const Login = () => {
             if (response.data.token && response.data.userId) {
                 localStorage.setItem('token', response.data.token);
                 localStorage.setItem('userId', response.data.userId);  
+                localStorage.setItem('role', response.data.role); 
                 navigate('/home');
                 console.log(localStorage.getItem('userId'));
 

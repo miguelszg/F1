@@ -1,0 +1,98 @@
+.modal-overlay1 {
+    position: fixed;
+    top: 10%;
+    left: 70%;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content1 {
+    position: relative;
+    background-color: #0c0c0c;
+    width: 90%;
+    max-width: 400px;
+    padding: 20px;
+    border-radius: 30px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+    max-height: 80vh; /* Limitar la altura para permitir el scroll */
+    overflow-y: auto; /* Habilitar scroll cuando sea necesario */
+}
+
+.back-arrow1 {
+    position: absolute;
+    top: 25px;
+    left: 25px;
+    color: #666;
+    font-size: 24px;
+    cursor: pointer;
+}
+
+.modal-content1 h1 {
+    color: white;
+    text-align: center;
+    margin: 15px 0 0 0;
+    font-size: 22px;
+}
+
+.modal-scroll {
+    max-height: 60vh; /* Limitar la altura de la sección con scroll */
+    overflow-y: auto;
+}
+
+.form-group1 {
+    margin-bottom: 15px;
+}
+
+.form-group1 label {
+    display: block;
+    color: #cf0a2c;
+    margin-bottom: 5px;
+    font-weight: bold;
+}
+
+.form-group1 input,
+.form-group1 textarea {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid #cf0a2c;
+    border-radius: 12px;
+    background-color: white;
+    box-sizing: border-box;
+    color: black;
+}
+
+.form-group1 textarea {
+    height: 120px;
+    resize: none;
+}
+
+button[type="submit"] {
+    width: 50%;
+    background-color: #cf0a2c;
+    color: white;
+    border: none;
+    border-radius: 25px;
+    padding: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    margin-top: 10px;
+}
+
+button[type="submit"]:hover {
+    background-color: #b00926;
+}
+
+
+.success-message {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+    margin-top: 20px;
+    text-align: center;
+    font-size: 16px;
+}

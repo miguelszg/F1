@@ -4,6 +4,7 @@ import profile from '../assets/profile.jpg';
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../services/api';
+import Footbar from '../layouts/footbar';
 
 const Profile = () => {
     const navigate = useNavigate();
@@ -148,6 +149,7 @@ const Profile = () => {
             </div>
         )}
         </div>
+        
     );
 };
 

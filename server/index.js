@@ -90,6 +90,7 @@ app.post('/api/login', async (req, res) => {
   try {
     const { db } = await connectToMongo();
     const user = await db.collection('users').findOne({ correo });
+
     if (!user) {
       return res.status(400).json({ error: 'Usuario no encontrado' });
     }
@@ -98,21 +99,38 @@ app.post('/api/login', async (req, res) => {
     if (!passwordMatch) {
       return res.status(400).json({ error: 'Contraseña incorrecta' });
     }
-    
-    const secret = speakeasy.generateSecret({ name: 'MyApp' });
-    
-    await db.collection('users').updateOne(
-      { correo },
-      { $set: { mfaSecret: secret.base32 } } 
-    );
 
-    const qrCodeUrl = await qrcode.toDataURL(secret.otpauth_url);
-    return res.status(200).json({ message: 'Configura MFA', qrCodeUrl });
+    // 🔹 Verificar si ya tiene un secreto MFA
+    let secret;
+    if (user.mfaSecret) {
+      secret = { base32: user.mfaSecret };
+    } else {
+      secret = speakeasy.generateSecret({ name: 'MyApp' });
+
+      await db.collection('users').updateOne(
+        { correo },
+        { $set: { mfaSecret: secret.base32 } }
+      );
+    }
+
+    // 🔹 Generar código QR a partir del secreto MFA (ahora siempre existirá)
+    const otpauth_url = `otpauth://totp/MyApp?secret=${secret.base32}&issuer=MyApp`;
+    const qrCodeUrl = await qrcode.toDataURL(otpauth_url);
+
+    return res.status(200).json({
+      message: 'Configura MFA',
+      qrCodeUrl, // ✅ Ahora siempre se generará correctamente
+      role: user.role, // ✅ Se incluye el role en la respuesta
+    });
+
   } catch (error) {
     console.error('Error en el login:', error);
     res.status(500).json({ error: 'Error al iniciar sesión' });
   }
 });
+
+
+
 
 // Forgot password route
 app.post('/api/forgot-password', async (req, res) => {
@@ -219,7 +237,14 @@ app.post('/api/verify-mfa', async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user._id }, JWT_SECRET, { expiresIn: '1h' });
-    res.status(200).json({ message: 'Autenticación exitosa', token, userId: user._id });
+
+    return res.status(200).json({ 
+      message: 'Autenticación exitosa',
+      token,
+      userId: user._id,
+      role: user.role // Enviamos el role aquí
+    });
+
   } catch (error) {
     res.status(500).json({ error: 'Error al verificar el código MFA' });
   }
@@ -240,6 +265,39 @@ app.get('/api/carousel', async (req, res) => {
     res.status(500).json({ error: 'Error al obtener datos del carrusel' });
   }
 });
+
+//agregar noticia
+app.post('/api/carousel', async (req, res) => {
+  try {
+      const { title, description, image, detailedInfo } = req.body;
+
+      if (!title || !description || !image || !detailedInfo) {
+          return res.status(400).json({ error: 'Todos los campos son obligatorios' });
+      }
+
+      const { db } = await connectToMongo();
+      
+      const newNews = {
+          title,
+          description,
+          image,
+          link: '/articule', // Valor por defecto
+          detailedInfo,
+      };
+
+      const result = await db.collection('carousel').insertOne(newNews);
+
+      if (!result.acknowledged) {
+          throw new Error('Error al insertar la noticia');
+      }
+
+      res.status(201).json({ message: 'Noticia agregada exitosamente' });
+  } catch (error) {
+      console.error('Error al insertar noticia:', error);
+      res.status(500).json({ error: 'Error interno del servidor' });
+  }
+});
+
 
 // Articles route
 app.get('/api/articles/:id', async (req, res) => {
